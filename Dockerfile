@@ -1,4 +1,4 @@
-FROM ljocha/gromacs:2018.6-plumed2.5
+FROM ljocha/gromacs:2019.4.4-1
 
 USER root
 RUN apt-get update && apt-get install -y python-pip  && apt clean
