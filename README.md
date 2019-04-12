@@ -9,4 +9,4 @@ There are several options to run:
 * Build the container in the same way, convert to [Singularity](https://singularity.lbl.gov), and run it in your favourite paranoid computing centre which does not allow Docker otherwise
 * Run on suitable [Binder](https://binderhub.readthedocs.io) instance where reasonable resources are available (this is not the case with publicly available [mybinder.org](http://mybinder.org). Just provide link to this repo, the container is build and started by the service.
 
-In either case, go to index.ipynb and enjoy!
+In either case, go to *index.ipynb* and enjoy!
