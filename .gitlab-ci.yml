@@ -1,0 +1,22 @@
+image: docker:latest
+
+services:
+- docker:dind
+
+before_script:
+- ip a s
+- apk add --update bash
+- apk add --update singularity-container
+- docker version
+- docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+
+
+
+build-all:
+  stage: build
+  script:
+    - docker build --pull -t "$CI_REGISTRY_NAME"/chicken-and-egg
+    - docker push "$CI_REGISTRY_NAME"/chicken-and-egg
+    - singularity build -w chicken-and-egg.img docker:"$CI_REGISTRY_NAME"/chicken-and-egg
+  only:
+    - master
