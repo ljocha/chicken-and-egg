@@ -18,9 +18,9 @@ build-all:
   script:
     - docker build --pull -t "$CI_REGISTRY_NAME"/chicken-and-egg
     - docker push "$CI_REGISTRY_NAME"/chicken-and-egg
-    - singularity build -w chicken-and-egg.img docker:"$CI_REGISTRY_NAME"/chicken-and-egg
+    - singularity/build.sh
   artifacts:
     paths:
-      - chicken-and-egg.img
+      - singularity/chicken-and-egg.img
   only:
     - master
