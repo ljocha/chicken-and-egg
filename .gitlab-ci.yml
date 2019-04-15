@@ -14,8 +14,8 @@ before_script:
 build-all:
   stage: build
   script:
-    - docker build --pull -t "$CI_REGISTRY_NAME"/chicken-and-egg
-    - docker push "$CI_REGISTRY_NAME"/chicken-and-egg
+    - docker build --pull -t "$CI_REGISTRY_IMAGE"/chicken-and-egg
+    - docker push "$CI_REGISTRY_IMAGE"/chicken-and-egg
     - singularity/build.sh
   artifacts:
     paths:
