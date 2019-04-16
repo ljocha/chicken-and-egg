@@ -1,6 +1,6 @@
 #!/bin/bash
 
-apk install build-essential libssl-dev uuid-dev libgpgme11-dev libseccomp-dev pkg-config squashfs-tools || exit 1
+apk add --update  build-essential libssl-dev uuid-dev libgpgme11-dev libseccomp-dev pkg-config squashfs-tools || exit 1
 
 cd singularity
 
