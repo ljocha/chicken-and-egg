@@ -19,6 +19,6 @@ build-all:
     - singularity/build.sh
   artifacts:
     paths:
-      - singularity/chicken-and-egg.img
+      - singularity/chicken-and-egg.img 
   only:
     - master
