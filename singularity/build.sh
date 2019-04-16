@@ -12,4 +12,4 @@ echo t=$CI_JOB_TOKEN
 IMAGE=${CI_REGISTRY_IMAGE:-ljocha}
 
 docker build --pull -t ljocha/singularity singularity &&
-docker run -v $PWD/singularity:/mnt ljocha/singularity /mnt/build-inside.sh "$CI_REGISTRY" "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY_IMAGE"
+docker run --privileged -v $PWD/singularity:/mnt ljocha/singularity /mnt/build-inside.sh "$CI_REGISTRY" "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY_IMAGE"
