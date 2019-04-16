@@ -7,5 +7,6 @@ ENV TZ=Europe/Prague
 
 RUN apt update 
 RUN apt install -y singularity-container ca-certificates
+RUN apt install -y docker.io
 
 WORKDIR /mnt
