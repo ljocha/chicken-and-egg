@@ -6,7 +6,7 @@ image: ubuntu:latest
 before_script:
   - apt update
   - apt install -y singularity-container ca-certificates docker.io
-  - dockerd
+  - dockerd &
   - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD" "$DOCKER_REGISTRY"
 
 
