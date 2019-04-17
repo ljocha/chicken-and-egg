@@ -5,13 +5,17 @@ image: ubuntu:latest
 
 before_script:
   - apt update
-  - apt install -y singularity-container
+  - apt install -y singularity-container ca-certificates docker.io
+  - dockerd
+  - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD" "$DOCKER_REGISTRY"
 
 
 
 build-all:
   stage: build
   script:
+    - docker build -t $CI_REGISTRY_NAME/chicken-and-egg .
+    - docker push $CI_REGISTRY_NAME/chicken-and-egg
     - SINGULARITY_DOCKER_USERNAME=$CI_REGISTRY_USER SINGULARITY_DOCKER_PASSWORD=$CI_REGISTRY_PASSWORD singularity build -w singularity/chicken-and-egg.img docker://$CI_REGISTRY_IMAGE/chicken-and-egg
   artifacts:
     paths:
