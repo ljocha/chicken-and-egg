@@ -1,4 +1,4 @@
-FROM ljocha/gromacs:2019.4.4-1
+FROM ljocha/gromacs:2019.4.30-1
 
 USER root
 
@@ -24,9 +24,18 @@ RUN pip3 install cython
 RUN pip3 install mdtraj 
 RUN pip3 install pandas 
 
+# set externally to match the running env
+# ENV USER xxx
+# ENV UID xxx
 
-ARG NB_USER=ljocha
-ARG NB_UID=1000
+ARG NB_USER=jupyter
+ARG NB_UID=1001
+
+ENV HOME /home/$NB_USER
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
+
+RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER
 
 COPY . ${HOME}
 RUN chown -R ${NB_UID} ${HOME}
