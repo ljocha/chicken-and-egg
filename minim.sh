@@ -41,7 +41,7 @@ for p in $(seq 1 $np); do
 	) >minim-$p.log 2>&1 &
 done
 
-echo Waiting for workers to finish >&3
+echo Waiting for workers to finish 
 wait
 
 echo Done, last 200 lines of their logs
@@ -49,5 +49,5 @@ echo
 
 for p in $(seq 1 $np); do
 	echo ----- $p -----
-	tail -500 minim-$p.log
+	tail -200 minim-$p.log
 done
