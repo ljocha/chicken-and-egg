@@ -5,28 +5,25 @@ USER root
 ENV DEBIAN_FRONTEND=noninteractive 
 ENV TZ=Europe/Prague
 
-RUN apt update 
-RUN apt install -y python3-pip  
-# RUN apt install -y pymol 
-RUN apt install -y pkg-config libopenbabel-dev openbabel swig
-RUN apt install libz-dev
-RUN apt clean
+ARG INTELPYTHON=l_pythoni3_p_2019.4.088.tar.gz
 
-RUN pip3 install --no-cache-dir notebook==5.*
+#RUN apt update  && apt upgrade -y && apt install -y pkg-config libopenbabel-dev openbabel swig && apt clean
+# RUN apt update  && apt upgrade -y && apt clean
 
-RUN pip3 install numpy scipy sklearn matplotlib 
+COPY ${INTELPYTHON} /tmp
+RUN cd /opt && tar xzf /tmp/${INTELPYTHON} && cd intelpython3 && ./setup_intel_python.sh && echo source /opt/intelpython3/bin/activate  >>/etc/bash.bashrc && rm /tmp/${INTELPYTHON}
 
-RUN pip3 install openbabel
-RUN pip3 install pypdb 
-RUN pip3 install pyDOE 
-RUN pip3 install nglview 
-RUN pip3 install cython 
-RUN pip3 install mdtraj 
-RUN pip3 install pandas 
+# RUN bash -c "source /opt/intelpython3/bin/activate && conda update -y --all && conda install -y -c openbabel openbabel && conda install -y --freeze-installed -c conda-forge pypdb pydoe mdtraj nglview && conda install -y notebook pandas"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y notebook pandas"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c openbabel openbabel"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y --freeze-installed -c conda-forge pypdb pydoe mdtraj nglview"
 
 # set externally to match the running env
 # ENV USER xxx
 # ENV UID xxx
+
+RUN apt update && apt install -y libxrender1 libxext6 && apt clean
+RUN bash -c "source /opt/intelpython3/bin/activate && jupyter-nbextension enable nglview --py --sys-prefix"
 
 ARG NB_USER=jupyter
 ARG NB_UID=1001
@@ -37,7 +34,7 @@ ENV LANGUAGE en_US.UTF-8
 
 RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER
 
-COPY . ${HOME}
+COPY *.ipynb *.template minim.sh ${HOME}/
 RUN chown -R ${NB_UID} ${HOME}
 
 USER $NB_USER
