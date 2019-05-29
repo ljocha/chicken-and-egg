@@ -8,4 +8,4 @@ if [ ! -f "$INTELPYTHON" ]; then
 	exit 1
 fi
 
-docker build --pull -t ljocha/chicken-and-egg:latest --build-arg NB_USER=$USER --build-arg NB_UID=$(id -u) --build-arg INTELPYTHON=${INTELPYTHON} .
+docker build --pull -t ljocha/chicken-and-egg:latest --build-arg INTELPYTHON=${INTELPYTHON} .

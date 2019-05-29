@@ -39,3 +39,5 @@ RUN chown -R ${NB_UID} ${HOME}
 
 USER $NB_USER
 WORKDIR $HOME
+
+CMD bash -c "sleep 2 && source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 9000"
