@@ -18,6 +18,10 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y notebook 
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c openbabel openbabel"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y --freeze-installed -c conda-forge pypdb pydoe mdtraj nglview"
 
+
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c intel tensorflow keras"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y --freeze-installed -c spiwokv anncolvar"
+
 # set externally to match the running env
 # ENV USER xxx
 # ENV UID xxx
