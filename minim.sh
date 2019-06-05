@@ -3,13 +3,11 @@
 np=$1
 
 if [ -z "$np" ]; then
-	set -- $(grep '^processor' /proc/cpuinfo | tail -1)
-	np=$(($3 + 1))
-	set -- $(grep '^flags' /proc/cpuinfo | head -1)
-	while [ -n "$1" -a "$1" != ht ]; do shift; done
-	if [ "$1" = ht ]; then np=$(($np / 2)); fi
+	echo usage: $0 number_of_cores
+	exit 1
 fi
 
+unset OMP_NUM_THREADS
 
 
 minone() {
