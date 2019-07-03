@@ -38,7 +38,7 @@ ENV LANGUAGE en_US.UTF-8
 
 RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER
 
-COPY *.ipynb *.template minim.sh ${HOME}/
+COPY *.ipynb *.template minim.sh ncores.sh xvg.py *.mdp ${HOME}/
 RUN chown -R ${NB_UID} ${HOME}
 
 USER $NB_USER
