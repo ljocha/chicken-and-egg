@@ -19,7 +19,7 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c intel 
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y notebook pandas"
 # RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c openbabel openbabel"
 #RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y --freeze-installed -c conda-forge pypdb pydoe mdtraj nglview"
-RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-forge pypdb pydoe mdtraj nglview"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-forge pydoe mdtraj nglview"
 
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c spiwokv anncolvar"
 
@@ -31,8 +31,10 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c spiwok
 RUN apt update && apt install -y libxrender1 libxext6 git && apt clean
 RUN bash -c "source /opt/intelpython3/bin/activate && jupyter-nbextension enable nglview --py --sys-prefix"
 
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c intel biopython"
+
 COPY PeptideBuilder.patch /tmp
-RUN bash -c "cd /tmp && git clone ${PEPTIDEBUILDER} && cd PeptideBuilder && patch -p1 <../PeptideBuilder.patch && cd .. && tar cf - PeptideBuilder | (cd /opt/intelpython3/lib/python3.6/ && tar xf -)"
+RUN bash -c "cd /tmp && git clone ${PEPTIDEBUILDER} && cd PeptideBuilder && patch -p1 <../PeptideBuilder.patch && tar cf - PeptideBuilder | (cd /opt/intelpython3/lib/python3.6/ && tar xf -)"
 
 ARG NB_USER=jupyter
 ARG NB_UID=1001
