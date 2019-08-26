@@ -3,8 +3,8 @@
 
 ## CUSTOMIZE !!!
 
-WORKDIR=$HOME/tmp/test-chicken
-PDBIN=secret.pdb
+WORKDIR=
+PDBIN=
 
 [ -d "$WORKDIR" -a -f "$WORKDIR/$PDBIN" ] || { echo WORKDIR must be set, $PDBIN must exist >&2; exit 1; }
 
@@ -16,7 +16,9 @@ mkdir tmp local work
 SINGULARITY_TMPDIR=$SCRATCHDIR/tmp 
 SINGULARITY_CACHEDIR=$SCRATCHDIR 
 SINGULARITY_DOCKER_USERNAME=chicken-and-egg 
-SINGULARITY_DOCKER_PASSWORD=2VAqRJQhXh5pwF_4f_oC
+
+# FILL IN 
+SINGULARITY_DOCKER_PASSWORD=
 
 DOCKER_IMAGE=registry.gitlab.ics.muni.cz:443/3086/chicken-and-egg:latest
 
