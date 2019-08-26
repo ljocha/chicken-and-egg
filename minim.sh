@@ -26,7 +26,7 @@ minone() {
 	gmx grompp -f minim.mdp -c $base-box.gro -p $base.top -o $base-min.tpr -po $base-min.mdp -maxwarn 1 &&
 	gmx mdrun -v -deffnm $base-min -ntmpi 1 -ntomp 1 &&
 	(echo 10; echo) | gmx energy -f $base-min.edr -xvg none -o $base.x &&
-	tail -1 $base.x $base.minen && rm $base.x
+	tail -1 $base.x >$base.minen && rm $base.x
 }
 
 nfil=$(ls conf*.pdb | wc -l)
