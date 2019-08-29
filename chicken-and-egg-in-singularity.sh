@@ -33,7 +33,7 @@ SINGULARITYENV_OMP_NUM_THREADS=$PBS_NUM_PPN
 export SINGULARITYENV_OMP_NUM_THREADS 
 
 singularity exec \
-	-B $SCRATCHDIR:/work \
+	-B $SCRATCHDIR/work:/work \
 	-B $SCRATCHDIR/local:/home/jupyter/.local \
 	chicken-and-egg-latest.simg \
 	bash -c 'source /opt/intelpython3/bin/activate && cd /work && cp /home/jupyter/* . && jupyter nbconvert --ExecutePreprocessor.timeout=None --to notebook --execute chicken-and-egg.ipynb' 
