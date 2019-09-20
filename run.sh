@@ -13,4 +13,6 @@ id=$($docker run -e OMP_NUM_THREADS -u 0 -p $port:$port -d -v $PWD:/home/jupyter
 
 trap "$docker kill $id" EXIT
 
+
+$docker exec -u 0 $id adduser --disabled-password --uid $(id -u) $(id -n -u)
 $docker exec -u $(id -u) $id bash -c "source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port $port"

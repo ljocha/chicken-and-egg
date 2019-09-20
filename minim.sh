@@ -24,7 +24,7 @@ minone() {
 	# no ions
 #	echo Minimize
 	gmx grompp -f minim.mdp -c $base-box.gro -p $base.top -o $base-min.tpr -po $base-min.mdp -maxwarn 1 &&
-	gmx mdrun -v -deffnm $base-min -ntmpi 1 -ntomp 1 &&
+	gmx mdrun -v -deffnm $base-min -ntomp 1 &&
 	(echo 10; echo) | gmx energy -f $base-min.edr -xvg none -o $base.xvg &&
 	tail -1 $base.xvg >$base.minen && rm $base.xvg
 }
