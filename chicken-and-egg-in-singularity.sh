@@ -41,4 +41,4 @@ singularity exec \
 #	bash -c 'source /opt/intelpython3/bin/activate && cd /work && cp /home/jupyter/* . && jupyter notebook --ip 0.0.0.0 --port 9000'
 
 
-cd work && tar cf - *ipynb $(basename $PDBIN) | (cd $WORKDIR && tar xf -)
+cd work && tar cf - *ipynb $(basename $PDBIN .pdb) | (cd $WORKDIR && tar xf -)
