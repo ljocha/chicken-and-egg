@@ -32,6 +32,10 @@ cp $WORKDIR/$PDBIN work
 SINGULARITYENV_OMP_NUM_THREADS=$PBS_NUM_PPN
 export SINGULARITYENV_OMP_NUM_THREADS 
 
+for var in $(env | grep '^PBS_' | sed 's/=.*$//'); do
+	unset $var
+done
+
 singularity exec \
 	-B $SCRATCHDIR/work:/work \
 	-B $SCRATCHDIR/local:/home/jupyter/.local \
