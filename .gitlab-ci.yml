@@ -1,4 +1,4 @@
-image: docker
+image: docker:dind
 
 services:
 - docker:dind
@@ -6,8 +6,7 @@ services:
 build-all:
   stage: build
   script:
-    - apt update
-    - apt install -y ca-certificates docker.io smbclient
+    - apk add samba-client
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - smbget -U "$SMB_USER%$SMB_PASSWORD" $SMB_SHARE/$INTELPYTHON
     - docker build -t $CI_REGISTRY_IMAGE .
