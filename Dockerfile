@@ -8,25 +8,15 @@ ENV TZ=Europe/Prague
 ARG INTELPYTHON=l_pythoni3_p_2019.4.088.tar.gz
 ARG PEPTIDEBUILDER=https://github.com/mtien/PeptideBuilder.git
 
-#RUN apt update  && apt upgrade -y && apt install -y pkg-config libopenbabel-dev openbabel swig && apt clean
-# RUN apt update  && apt upgrade -y && apt clean
-
 COPY ${INTELPYTHON} /tmp
 RUN cd /opt && tar xzf /tmp/${INTELPYTHON} && cd intelpython3 && ./setup_intel_python.sh && echo source /opt/intelpython3/bin/activate  >>/etc/bash.bashrc && rm /tmp/${INTELPYTHON}
+RUN bash -c "source /opt/intelpython3/bin/activate && conda update -y -c intell --all"
 
-# RUN bash -c "source /opt/intelpython3/bin/activate && conda update -y --all && conda install -y -c openbabel openbabel && conda install -y --freeze-installed -c conda-forge pypdb pydoe mdtraj nglview && conda install -y notebook pandas"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c intel tensorflow keras"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y notebook pandas"
-# RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c openbabel openbabel"
-#RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y --freeze-installed -c conda-forge pypdb pydoe mdtraj nglview"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-forge pydoe mdtraj nglview"
 
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c spiwokv anncolvar"
-
-
-# set externally to match the running env
-# ENV USER xxx
-# ENV UID xxx
 
 RUN apt update && apt install -y libxrender1 libxext6 git && apt clean
 RUN bash -c "source /opt/intelpython3/bin/activate && jupyter-nbextension enable nglview --py --sys-prefix"
