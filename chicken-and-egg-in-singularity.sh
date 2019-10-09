@@ -26,13 +26,26 @@ export SINGULARITY_TMPDIR SINGULARITY_CACHEDIR SINGULARITY_DOCKER_USERNAME SINGU
 
 [ -z "$DONTPULL" ] && singularity pull docker://$DOCKER_IMAGE
 
-echo pdbfile = \"$PDBIN\" >work/config.py
+NTMPI=1	# good for small molecules
+
+cat - >work/config.py <<EOF
+pdbfile = "$PDBIN"
+mdsteps = 25000000	# 50 ns is enough
+ntmpi = $NTMPI
+ntomp = $(($PBS_NUM_PPN	/ $NTMPI))	# XXX: should be divisible
+EOF
+
+
 cp $WORKDIR/$PDBIN work
 
 SINGULARITYENV_OMP_NUM_THREADS=$PBS_NUM_PPN
 export SINGULARITYENV_OMP_NUM_THREADS 
 
-singularity exec \
+for var in $(env | grep '^PBS_' | sed 's/=.*$//'); do
+	unset $var
+done
+
+singularity exec --nv \
 	-B $SCRATCHDIR/work:/work \
 	-B $SCRATCHDIR/local:/home/jupyter/.local \
 	chicken-and-egg-latest.simg \
@@ -41,4 +54,4 @@ singularity exec \
 #	bash -c 'source /opt/intelpython3/bin/activate && cd /work && cp /home/jupyter/* . && jupyter notebook --ip 0.0.0.0 --port 9000'
 
 
-cd work && tar cf - *ipynb $(basename $PDBIN) | (cd $WORKDIR && tar xf -)
+cd work && tar cf - *ipynb $(basename $PDBIN .pdb) | (cd $WORKDIR && tar xf -)
