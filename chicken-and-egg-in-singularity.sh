@@ -29,7 +29,7 @@ export SINGULARITY_TMPDIR SINGULARITY_CACHEDIR SINGULARITY_DOCKER_USERNAME SINGU
 NTMPI=1	# good for small molecules
 
 cat - >work/config.py <<EOF
-pdbfile = \"$PDBIN\"
+pdbfile = "$PDBIN"
 mdsteps = 25000000	# 50 ns is enough
 ntmpi = $NTMPI
 ntomp = $(($PBS_NUM_PPN	/ $NTMPI))	# XXX: should be divisible
