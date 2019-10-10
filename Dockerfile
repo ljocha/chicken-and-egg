@@ -14,7 +14,7 @@ COPY ${INTELPYTHON} /tmp
 RUN cd /opt && tar xzf /tmp/${INTELPYTHON} && cd intelpython3 && ./setup_intel_python.sh && echo source /opt/intelpython3/bin/activate  >>/etc/bash.bashrc && rm /tmp/${INTELPYTHON}
 
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c intel tensorflow=1.14.0 keras=2.2.4"
-RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y notebook=notebook=5.2.2 pandas=0.24.2"
+RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y notebook=5.2.2 pandas=0.24.2"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-forge pydoe=0.3.8 mdtraj=1.9.3 nglview=2.7.1"
 RUN bash -c "source /opt/intelpython3/bin/activate && jupyter-nbextension enable nglview --py --sys-prefix"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c spiwokv anncolvar=0.6"
