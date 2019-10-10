@@ -41,6 +41,10 @@ cp $WORKDIR/$PDBIN work
 SINGULARITYENV_OMP_NUM_THREADS=$PBS_NUM_PPN
 export SINGULARITYENV_OMP_NUM_THREADS 
 
+# https://github.com/ContinuumIO/anaconda-issues/issues/11294
+SINGULARITYENV_KMP_INIT_AT_FORK=FALSE
+export SINGULARITYENV_KMP_INIT_AT_FORK
+
 for var in $(env | grep '^PBS_' | sed 's/=.*$//'); do
 	unset $var
 done
