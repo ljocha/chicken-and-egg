@@ -12,6 +12,7 @@ RUN apt update && apt install -y libxrender1 libxext6 git && apt clean
 
 COPY ${INTELPYTHON} /tmp
 RUN cd /opt && tar xzf /tmp/${INTELPYTHON} && cd intelpython3 && ./setup_intel_python.sh && echo source /opt/intelpython3/bin/activate  >>/etc/bash.bashrc && rm /tmp/${INTELPYTHON}
+RUN bash -c "source /opt/intelpython3/bin/activate && conda update -y -c intell --all"
 
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c intel tensorflow=1.14.0 keras=2.2.4"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y notebook=notebook=5.2.2 pandas=0.24.2"
