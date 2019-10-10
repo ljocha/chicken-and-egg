@@ -9,7 +9,7 @@ build-all:
     - apk add samba-client
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - smbget -U "$SMB_USER%$SMB_PASSWORD" $SMB_SHARE/$INTELPYTHON
-    - docker build -t $CI_REGISTRY_IMAGE .
+    - docker build -t $CI_REGISTRY_IMAGE --build-arg INTELPYTHON=$INTELPYTHON .
     - docker push $CI_REGISTRY_IMAGE
   only:
     - master
