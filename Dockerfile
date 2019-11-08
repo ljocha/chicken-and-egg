@@ -1,4 +1,4 @@
-FROM ljocha/gromacs:2019.10.1-1 
+FROM ljocha/gromacs:2019.11.08-1 
 
 USER root
 
@@ -20,8 +20,7 @@ RUN bash -c "source /opt/intelpython3/bin/activate && jupyter-nbextension enable
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c spiwokv anncolvar=0.6"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c intel biopython=1.74"
 
-COPY PeptideBuilder.patch /tmp
-RUN bash -c "cd /tmp && git clone ${PEPTIDEBUILDER} && cd PeptideBuilder && patch -p1 <../PeptideBuilder.patch && tar cf - PeptideBuilder | (cd /opt/intelpython3/lib/python3.6/ && tar xf -)"
+RUN bash -c "cd /tmp && git clone ${PEPTIDEBUILDER} && cd PeptideBuilder && git checkout bef233ac973700d72c40cce8417c2ada6fa40856  && cd .. && tar cf - PeptideBuilder | (cd /opt/intelpython3/lib/python3.6/ && tar xf -)"
 
 ARG NB_USER=jupyter
 ARG NB_UID=1001
