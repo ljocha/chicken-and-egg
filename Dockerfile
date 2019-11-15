@@ -17,10 +17,13 @@ RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c intel 
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y notebook=5.2.2 pandas=0.24.2"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c conda-forge pydoe=0.3.8 mdtraj=1.9.3 nglview=2.7.1"
 RUN bash -c "source /opt/intelpython3/bin/activate && jupyter-nbextension enable nglview --py --sys-prefix"
-RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c spiwokv anncolvar=0.6"
 RUN bash -c "source /opt/intelpython3/bin/activate && conda install -y -c intel biopython=1.74"
 
 RUN bash -c "cd /tmp && git clone ${PEPTIDEBUILDER} && cd PeptideBuilder && git checkout bef233ac973700d72c40cce8417c2ada6fa40856  && cd .. && tar cf - PeptideBuilder | (cd /opt/intelpython3/lib/python3.6/ && tar xf -)"
+
+WORKDIR /tmp
+RUN git clone https://github.com/spiwokv/anncolvar.git && cd anncolvar && git checkout 1cdb4f8866f3f39880415abaa095423cebc2fa03 && iconv -f utf-8 -t ascii//TRANSLIT README.rst >README.$$ && mv README.$$ README.rst
+RUN bash -c "source /opt/intelpython3/bin/activate && cd anncolvar && python3 setup.py install"
 
 ARG NB_USER=jupyter
 ARG NB_UID=1001
