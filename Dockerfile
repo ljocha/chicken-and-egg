@@ -1,4 +1,4 @@
-FROM ljocha/gromacs:2019.11.08-1 
+FROM ljocha/gromacs:2019.11.15-1 
 
 USER root
 
