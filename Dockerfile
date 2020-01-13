@@ -32,20 +32,6 @@ RUN git clone ${PEPTIDEBUILDER} && cd PeptideBuilder && git checkout bef233ac973
 RUN git clone https://github.com/spiwokv/anncolvar.git && cd anncolvar && git checkout 1cdb4f8866f3f39880415abaa095423cebc2fa03 && iconv -f utf-8 -t ascii//TRANSLIT README.rst >README.$$ && mv README.$$ README.rst
 RUN cd anncolvar && ${ipy}/bin/python3 setup.py install
 
-#ARG NB_USER=jupyter
-#ARG NB_UID=1001
-#
-#ENV HOME /home/$NB_USER
-#ENV LANG en_US.UTF-8
-#ENV LANGUAGE en_US.UTF-8
-#
-#RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER
-#
-#COPY *.ipynb *.template minim.sh ncores.sh xvg.py *.mdp ${HOME}/
-#RUN chown -R ${NB_UID} ${HOME}
-
-#USER $NB_USER
 WORKDIR /work
-ENTRYPOINT [ ${ipy}/bin/jupyter ]
-
-#CMD bash -c "sleep 2 && source /opt/intelpython3/bin/activate && jupyter notebook --ip 0.0.0.0 --port 9000"
+ENV HOME /work
+ENV PATH ${ipy}/bin:${PATH}
