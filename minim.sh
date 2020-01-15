@@ -3,6 +3,8 @@
 np=$1
 box=${2:-1.0}
 
+gmx="/work/gmx-docker --"
+
 if [ -z "$np" ]; then
 	echo usage: $0 number_of_cores
 	exit 1
@@ -17,15 +19,15 @@ minone() {
 	base=$(basename $in .pdb)
 	
 #	echo Prepare topology
-	gmx pdb2gmx -f $base.pdb -o $base.gro -p $base -i $base -water spce -ff amber99 -ignh &&
+	$gmx pdb2gmx -f $base.pdb -o $base.gro -p $base -i $base -water spce -ff amber99 -ignh &&
 #	echo Add box
-	gmx editconf -f $base.gro -o $base-box.gro -d $box -bt cubic &&
+	$gmx editconf -f $base.gro -o $base-box.gro -d $box -bt cubic &&
 	# not solvating
 	# no ions
 #	echo Minimize
-	gmx grompp -f minim.mdp -c $base-box.gro -p $base.top -o $base-min.tpr -po $base-min.mdp -maxwarn 1 &&
-	gmx mdrun -v -deffnm $base-min -ntomp 1 &&
-	(echo 10; echo) | gmx energy -f $base-min.edr -xvg none -o $base.xvg &&
+	$gmx grompp -f minim.mdp -c $base-box.gro -p $base.top -o $base-min.tpr -po $base-min.mdp -maxwarn 1 &&
+	$gmx mdrun -v -deffnm $base-min -ntomp 1 &&
+	(echo 10; echo) | $gmx energy -f $base-min.edr -xvg none -o $base.xvg &&
 	tail -1 $base.xvg >$base.minen && rm $base.xvg
 }
 

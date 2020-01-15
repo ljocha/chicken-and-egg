@@ -27,10 +27,24 @@ RUN ${ipy}/bin/jupyter nbextension enable nglview --py --sys-prefix
 RUN mkdir  -p ${ipy}/share/jupyter/nbextensions && cd ${ipy}/share/jupyter/nbextensions && git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding && ${ipy}/bin/jupyter nbextension enable vim_binding/vim_binding --sys-prefix
  
 WORKDIR /tmp
-RUN git clone ${PEPTIDEBUILDER} && cd PeptideBuilder && git checkout bef233ac973700d72c40cce8417c2ada6fa40856  && cd .. && tar cf - PeptideBuilder | (cd ${ipy}/lib/python3.7/ && tar xf -)
+
+RUN git clone ${PEPTIDEBUILDER} && cd PeptideBuilder && git checkout bef233ac973700d72c40cce8417c2ada6fa40856  && tar cf - PeptideBuilder | (cd ${ipy}/lib/python3.7/ && tar xf -)
 
 RUN git clone https://github.com/spiwokv/anncolvar.git && cd anncolvar && git checkout 1cdb4f8866f3f39880415abaa095423cebc2fa03 && iconv -f utf-8 -t ascii//TRANSLIT README.rst >README.$$ && mv README.$$ README.rst
 RUN cd anncolvar && ${ipy}/bin/python3 setup.py install
+
+ARG distribution=ubuntu18.04
+RUN apt install -y curl gnupg
+
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+RUN echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable" >>/etc/apt/sources.list
+
+RUN curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add -
+RUN curl -s -L -o /etc/apt/sources.list.d/nvidia-docker.list https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list 
+
+RUN apt update && apt install -y docker-ce-cli nvidia-container-toolkit
+RUN apt clean
+
 
 WORKDIR /work
 ENV HOME /work

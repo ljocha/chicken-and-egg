@@ -11,7 +11,7 @@ if [ ! -f "$INTELPYTHON" ]; then
 fi
 
 # docker build --pull -t $IMAGE$VERSION --build-arg INTELPYTHON=${INTELPYTHON} .
-docker build -t $IMAGE$VERSION --build-arg INTELPYTHON=${INTELPYTHON} .
-docker tag $IMAGE$VERSION $IMAGE:latest
-docker push $IMAGE$VERSION
+docker build -t $IMAGE$VERSION --build-arg INTELPYTHON=${INTELPYTHON} . &&
+docker tag $IMAGE$VERSION $IMAGE:latest &&
+docker push $IMAGE$VERSION &&
 docker push $IMAGE:latest
