@@ -9,14 +9,14 @@ PDBIN=__FILENAME__
 
 NTMPI=4	# good for small molecules
 
-#image=registry.gitlab.ics.muni.cz:443/3086/chicken-and-egg:$(cat VERSION)
-image=ljocha/chicken-and-egg:$(cat VERSION)
-
 [ -d "$WORKDIR" -a -f "$WORKDIR/$PDBIN" ] || { echo WORKDIR must be set, $PDBIN must exist >&2; exit 1; }
 [ -d "$SCRATCHDIR" ] || { echo SCRATCHDIR must exist; exit 1; }
 
 cd $BASEDIR && 
 	cp chicken-and-egg.ipynb  ions.mdp	 minim-sol.mdp	     minim.sh	npt.mdp  xvg.py gmx-docker	md.mdp.template  minim.mdp.template  ncores.sh	nvt.mdp  $SCRATCHDIR || { exit 1; }
+
+#image=registry.gitlab.ics.muni.cz:443/3086/chicken-and-egg:$(cat VERSION)
+image=ljocha/chicken-and-egg:$(cat VERSION)
 
 cd $SCRATCHDIR || { exit 1; }
 cp $WORKDIR/$PDBIN .
