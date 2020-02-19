@@ -21,8 +21,9 @@ fi
 
 DOUBLE=""
 
-eval set -- $(getopt -o +da:rRv:n:h -- "$@")
+eval set -- $(getopt -o +da:rRv:n:hc -- "$@")
 unset MPI
+unset clean
 
 while [ $1 != '--' ]; do case $1 in
 	-n) MPI="$2"; shift; shift ;;
@@ -31,6 +32,7 @@ while [ $1 != '--' ]; do case $1 in
 	-r) RDTSCP="_ts"; shift ;;
 	-R) RDTSCP=""; shift ;;
 	-v) VERSION=":$2"; shift; shift ;;
+	-c) clean=y; shift ;;
 	-h) cat >&2 <<EOF
 usage: $0 options [--] gromacs_args ...
 
@@ -41,6 +43,7 @@ options are:
 	-r		enforce RDTSCP (should be detected)
 	-R		disable RDTSCP
 	-v version	use specific docker image version ($DEFAULT_VERSION by default)
+	-c		cleanup -- remove docker image
 EOF
 	exit 1;;
 	--) shift; break ;;
@@ -69,4 +72,9 @@ if [ $($docker -v | sed 's/Docker version //; s/\..*$//;') -ge 19 ]; then
 	gpu="--gpus all"
 fi
 
-$docker run $gpu -u $(id -u):$(id -g) -i -v $WORKDIR_OUTSIDE:/tmp ${IMAGE}/gromacs_${ARCH}${RDTSCP}${DOUBLE}${VERSION} $MPIRUN gmx "$@"
+fullimage=${IMAGE}/gromacs_${ARCH}${RDTSCP}${DOUBLE}${VERSION} 
+if [ -n "$clean" ]; then
+	$docker rmi --force $fullimage
+else
+	$docker run $gpu -u $(id -u):$(id -g) -i -v $WORKDIR_OUTSIDE:/tmp $fullimage $MPIRUN gmx "$@"
+fi
