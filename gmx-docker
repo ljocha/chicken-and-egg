@@ -69,7 +69,10 @@ fi
 docker=docker
 which nvidia-docker && docker=nvidia-docker
 if [ $($docker -v | sed 's/Docker version //; s/\..*$//;') -ge 19 ]; then
-	gpu="--gpus all"
+	gpu="--gpus all --device /dev/nvidiactl:/dev/nvidiactl --device /dev/nvidia-uvm:/dev/nvidia-uvm"
+	for d in /dev/nvidia[0-9]*; do
+		gpu="$gpu --device $d:$d"
+	done
 fi
 
 fullimage=${IMAGE}/gromacs_${ARCH}${RDTSCP}${DOUBLE}${VERSION} 
