@@ -66,7 +66,10 @@ fi
 docker=docker
 which nvidia-docker && docker=nvidia-docker
 if [ $($docker -v | sed 's/Docker version //; s/\..*$//;') -ge 19 ]; then
-	gpu="--gpus all"
+	gpu="--gpus all --device /dev/nvidiactl:/dev/nvidiactl --device /dev/nvidia-uvm:/dev/nvidia-uvm"
+	for d in /dev/nvidia[0-9]*; do
+		gpu="$gpu --device $d:$d"
+	done
 fi
 
 $docker run $gpu -u $(id -u):$(id -g) -i -v $WORKDIR_OUTSIDE:/tmp ${IMAGE}/gromacs_${ARCH}${RDTSCP}${DOUBLE}${VERSION} $MPIRUN gmx "$@"
