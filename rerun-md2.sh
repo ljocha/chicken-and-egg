@@ -11,7 +11,7 @@ fnm=md3
 
 unset OMP_NUM_THREADS
 
-echo RESTART plumed-restart.dat
+echo RESTART >plumed-restart.dat
 cat plumed.dat >>plumed-restart.dat
 
 mkdir $fnm-backup
