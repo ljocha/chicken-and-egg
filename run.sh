@@ -14,6 +14,10 @@ if [ $($docker -v | sed 's/Docker version //; s/\..*$//;') -ge 19 ]; then
 	gpu="--gpus all"
 fi
 
+if [ -n "$NOGPU" ]; then
+	gpu=""
+fi
+
 KMP_INIT_AT_FORK=FALSE
 export KMP_INIT_AT_FORK
 
