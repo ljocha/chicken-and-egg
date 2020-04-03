@@ -1,38 +1,30 @@
 #!/bin/bash
 
-IMAGE=ljocha
-VERSION=:2020.01.14-1
+IMAGE_BASE=ljocha
+VERSION=:2020.02.06-1
+
 DEFAULT_VERSION=$VERSION
 
-FLAGS=`cat /proc/cpuinfo | grep ^flags | head -1`
-if echo $FLAGS | grep " avx512f " > /dev/null && docker run "${IMAGE}/gromacs-fmacnt${VERSION}" | grep "2" > /dev/null; then
-    ARCH="avx512"
-elif echo $FLAGS | grep " avx2 " > /dev/null; then
-    ARCH="avx2"
-elif echo $FLAGS | grep " avx " > /dev/null; then
-    ARCH="avx"
-else
-    ARCH="sse2"
-fi
-
-if echo $FLAGS | grep rdtscp >/dev/null; then
-	RDTSCP=_ts
-fi
-
 DOUBLE=""
+WORKDIR_CURRENT=""
 
-eval set -- $(getopt -o +da:rRv:n:hc -- "$@")
+eval set -- $(getopt -o +pcda:rw:Rv:n:h -- "$@")
 unset MPI
-unset clean
+unset PODMAN
+unset ARCH
+unset RDTSCP
+unset CLEAN
 
 while [ $1 != '--' ]; do case $1 in
 	-n) MPI="$2"; shift; shift ;;
 	-d) DOUBLE="_d"; shift ;;
 	-a) ARCH="$2"; shift; shift ;;
 	-r) RDTSCP="_ts"; shift ;;
+	-c) CLEAN=y; shift ;;
+	-w) WORKDIR_CURRENT="$2"; shift; shift ;;
 	-R) RDTSCP=""; shift ;;
 	-v) VERSION=":$2"; shift; shift ;;
-	-c) clean=y; shift ;;
+	-p) PODMAN=y; shift ;;
 	-h) cat >&2 <<EOF
 usage: $0 options [--] gromacs_args ...
 
@@ -41,13 +33,53 @@ options are:
 	-d		double precision
 	-a arch		enforce specific CPU architecture (sse2, avx, avx2, avx512)
 	-r		enforce RDTSCP (should be detected)
+	-w		select working directory relative to shared one for current enumeration
 	-R		disable RDTSCP
+	-c		cleanup -- just remove docker image 
+	-p		use podman instead of docker
 	-v version	use specific docker image version ($DEFAULT_VERSION by default)
-	-c		cleanup -- remove docker image
 EOF
 	exit 1;;
 	--) shift; break ;;
 esac; done
+
+if [ -n "$PODMAN" ]; then
+	if [ -z "$SCRATCHDIR" ]; then
+		echo Warning: SCRATCHDIR not set, / may be filled up >&2
+	else
+		TMPDIR=$SCRATCHDIR
+		export TMPDIR
+	fi
+	podman="podman --runtime /usr/bin/crun --root=${PWD}"
+	podman_run="$podman run --privileged --cgroups disabled --hostname ${HOSTNAME}"
+fi
+
+FLAGS=`cat /proc/cpuinfo | grep ^flags | head -1`
+
+if [ -z "$ARCH" ]; then
+	if [ -n "$PODMAN" ]; then
+		FMA="$($podman_run ${IMAGE_BASE}/gromacs-fmacnt${VERSION})"
+	else
+		FMA="$(docker run ${IMAGE_BASE}/gromacs-fmacnt${VERSION})"
+	fi
+
+	if echo $FLAGS | grep " avx512f " > /dev/null && echo "$FMA" | grep "^2" > /dev/null; then
+	    ARCH="avx512"
+	elif echo $FLAGS | grep " avx2 " > /dev/null; then
+	    ARCH="avx2"
+	elif echo $FLAGS | grep " avx " > /dev/null; then
+	    ARCH="avx"
+	else
+	    ARCH="sse2"
+	fi
+fi
+	
+if [ -z "$RDTSCP" ]; then
+	if echo $FLAGS | grep rdtscp >/dev/null; then
+		RDTSCP=_ts
+	fi
+fi
+
 
 while [ "$1" == '--' ]; do shift; done
 
@@ -58,7 +90,7 @@ if [ -n "$DOUBLE" ]; then
 fi
 
 if [ -z "$WORKDIR_OUTSIDE" ]; then
-	WORKDIR_OUTSIDE=$PWD
+	WORKDIR_OUTSIDE=${WORK:-$PWD}
 fi
 
 unset MPIRUN
@@ -66,18 +98,40 @@ if [ -n "$MPI" ]; then
 	MPIRUN="mpirun -np $MPI"
 fi
 
-docker=docker
-which nvidia-docker && docker=nvidia-docker
-if [ $($docker -v | sed 's/Docker version //; s/\..*$//;') -ge 19 ]; then
-	gpu="--gpus all --device /dev/nvidiactl:/dev/nvidiactl --device /dev/nvidia-uvm:/dev/nvidia-uvm"
-	for d in /dev/nvidia[0-9]*; do
-		gpu="$gpu --device $d:$d"
-	done
-fi
+IMAGE=${IMAGE_BASE}/gromacs_${ARCH}${RDTSCP}${DOUBLE}${VERSION} 
+VOLUME=${WORKDIR_OUTSIDE}${WORKDIR_CURRENT}:/tmp
 
-fullimage=${IMAGE}/gromacs_${ARCH}${RDTSCP}${DOUBLE}${VERSION} 
-if [ -n "$clean" ]; then
-	$docker rmi --force $fullimage
+if [ -n "$PODMAN" ]; then
+	cat - >/tmp/gmx-podman.$$ <<EOF
+#!/bin/bash
+
+cp /host/usr/lib/nvidia/current/nvidia-smi /usr/bin
+cp -rP /host/usr/lib/x86_64-linux-gnu/nvidia/current/* /usr/lib/x86_64-linux-gnu
+cp -rP /host/usr/lib/mesa-diverted/x86_64-linux-gnu/* /usr/lib/x86_64-linux-gnu
+EOF
+	echo -n $MPIRUN gmx >>/tmp/gmx-podman.$$
+	for a in "$@"; do
+		echo -n " "\"$a\" >>/tmp/gmx-podman.$$
+	done
+	echo >>/tmp/gmx-podman.$$
+
+	chmod +x /tmp/gmx-podman.$$
+
+	$podman_run -v /:/host -v $VOLUME -ti  $IMAGE /host/tmp/gmx-podman.$$
+	rm /tmp/gmx-podman.$$
+
 else
-	$docker run $gpu -u $(id -u):$(id -g) -i -v $WORKDIR_OUTSIDE:/tmp $fullimage $MPIRUN gmx "$@"
+# XXX: always grab all gpus
+	if [ $(docker -v | sed 's/Docker version //; s/\..*$//;') -ge 19 ]; then
+		gpu="--gpus all --device /dev/nvidiactl:/dev/nvidiactl --device /dev/nvidia-uvm:/dev/nvidia-uvm"
+		for d in /dev/nvidia[0-9]*; do
+			gpu="$gpu --device $d:$d"
+		done
+	fi
+
+	if [ -n "$CLEAN" ]; then
+		docker rmi --force ${IMAGE}
+	else
+		docker run $gpu -u $(id -u):$(id -g) -i -v $VOLUME ${IMAGE} $MPIRUN gmx "$@"
+	fi
 fi
