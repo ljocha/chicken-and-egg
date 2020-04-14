@@ -33,6 +33,9 @@ else
 	last=$2
 fi
 
+mem=$(($ncpus * 4))
+scratch=$(($ncpus * 10))
+
 name=$(basename $PWD)
 basedir=$PWD
 
@@ -77,7 +80,7 @@ EOF
 	if [ -n "$prevjob" ]; then dep="-W depend=afterany:$prevjob"; else dep=""; fi
 
 #	prevjob="fake-$n"
-	prevjob=$(qsub -q gpu -l walltime=24:0:0 -l select=1:cluster=glados:ncpus=$ncpus:ngpus=$ngpus:mem=60GB:scratch_local=200GB $dep $script)
+	prevjob=$(qsub -q gpu -l walltime=24:0:0 -l select=1:cluster=glados:ncpus=$ncpus:ngpus=$ngpus:mem=${mem}GB:scratch_local=${scratch}GB $dep $script)
 	echo $script: $prevjob
 done
 echo Good luck!
