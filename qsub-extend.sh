@@ -3,13 +3,42 @@
 ncpus=40
 ntomp=4
 ngpus=2
+prevjob=
 
-num=$1
+eval set -- $(getopt -o +n:t:g:a: -- "$@")
+
+while [ $1 != -- ]; do case $1 in
+	-n) ncpus=$2; shift; shift ;;
+	-t) ntomp=$2; shift; shift ;;
+	-g) ngpus=$2; shift; shift ;;
+	-a) prevjob="$2"; shift; shift ;;
+	*) cat >&2 <<EOF
+usege: $0 [options] [first] last
+
+	-n	total cores
+	-t 	OMP threads per MPI process
+	-g	GPUs
+	-a	previous job to wait for
+EOF
+	exit 1;
+esac; done
+
+[ "$1" == -- ] && shift
+
+if [ -z "$2" ]; then
+	first=1
+	last=$1
+else
+	first=$1
+	last=$2
+fi
 
 name=$(basename $PWD)
 basedir=$PWD
 
-prefix=/storage/brno3-cerit/home/ljocha/work/chicken-and-egg/
+# prefix=/storage/brno3-cerit/home/ljocha/work/chicken-and-egg/
+dir=$(dirname $0)
+prefix=$(cd ${dir:-.} && pwd)
 
 ntmpi=$(($ncpus / $ntomp))
 
@@ -19,8 +48,7 @@ mdrun="${prefix}/gmx-docker -p -n $ntmpi -- mdrun"
 echo RESTART >plumed-restart.dat
 cat plumed.dat >>plumed-restart.dat
 
-prevjob=
-for i in $(seq 1 $num); do
+for i in $(seq $first $last); do
 	n=$(printf '%02d' $i)
 	prev=$(printf '%02d' $(($i - 1)) )
 
