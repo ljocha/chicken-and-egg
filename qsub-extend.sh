@@ -5,7 +5,7 @@ ntomp=4
 ngpus=2
 prevjob=
 
-eval set -- $(getopt -o +n:t:g:a: -- "$@")
+eval set -- $(getopt -o +n:t:g:a:h -- "$@")
 
 while [ $1 != -- ]; do case $1 in
 	-n) ncpus=$2; shift; shift ;;
@@ -13,7 +13,7 @@ while [ $1 != -- ]; do case $1 in
 	-g) ngpus=$2; shift; shift ;;
 	-a) prevjob="$2"; shift; shift ;;
 	*) cat >&2 <<EOF
-usege: $0 [options] [first] last
+usage: $0 [options] [first] last
 
 	-n	total cores
 	-t 	OMP threads per MPI process
@@ -60,7 +60,21 @@ for i in $(seq $first $last); do
 	cat - >$script <<EOF
 #!/bin/bash
 
-trap "cp COLVAR HILLS md2.* $basedir" EXIT
+cleanup() {
+	test -n "$SCRATCHDIR" || exit 1
+	cd $SCRATCHDIR || exit 1
+	cp COLVAR HILLS md2.* $basedir
+	copied=$?
+	
+	id=$(podman --root $SCRATCHDIR ps | tail -1 | awk '{print $1}')
+	podman --root $SCRATCHDIR kill $id
+
+	if [ "$copied" = 0 ]; then
+		cd /tmp && rm -rf $SCRATCHDIR
+	fi
+}
+
+trap cleanup EXIT
 
 cd $basedir
 mkdir md2-$prev
