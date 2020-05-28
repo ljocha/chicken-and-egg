@@ -61,16 +61,16 @@ for i in $(seq $first $last); do
 #!/bin/bash
 
 cleanup() {
-	test -n "$SCRATCHDIR" || exit 1
-	cd $SCRATCHDIR || exit 1
+	test -n "\$SCRATCHDIR" || exit 1
+	cd \$SCRATCHDIR || exit 1
 	cp COLVAR HILLS md2.* $basedir
 	copied=$?
 	
-	id=$(podman --root $SCRATCHDIR ps | tail -1 | awk '{print $1}')
-	podman --root $SCRATCHDIR kill $id
+	id=\$(podman --root \$SCRATCHDIR ps | tail -1 | awk '{print \$1}')
+	podman --root \$SCRATCHDIR kill \$id
 
-	if [ "$copied" = 0 ]; then
-		cd /tmp && rm -rf $SCRATCHDIR
+	if [ "\$copied" = 0 ]; then
+		cd /tmp && rm -rf \$SCRATCHDIR
 	fi
 }
 
@@ -94,6 +94,7 @@ EOF
 	if [ -n "$prevjob" ]; then dep="-W depend=afterany:$prevjob"; else dep=""; fi
 
 #	prevjob="fake-$n"
+#	echo qsub -q gpu -l walltime=24:0:0 -l select=1:cluster=glados:ncpus=$ncpus:ngpus=$ngpus:mem=${mem}GB:scratch_local=${scratch}GB $dep $script
 	prevjob=$(qsub -q gpu -l walltime=24:0:0 -l select=1:cluster=glados:ncpus=$ncpus:ngpus=$ngpus:mem=${mem}GB:scratch_local=${scratch}GB $dep $script)
 	echo $script: $prevjob
 done
