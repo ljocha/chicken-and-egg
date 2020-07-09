@@ -1,6 +1,6 @@
 # Chicken and egg in molecular metadynamics
 
-This repo contains a sequence of Jupyter notebooks to generate random landmarks of a protein strucure, derive appropriate collective variables, and run metadynamics simulation of the protein unfolding-folding.
+This repo contains a Jupyter notebook to generate random landmarks of a protein strucure, derive appropriate collective variables, and run metadynamics simulation of the protein unfolding-folding.
 
 The notebooks must be run in a Docker container with all the Python dependencies and prebuilt Gromacs + Plumed. Dockerfile defining such container is provided (based on publicly available ljocha/gromacs).
 
@@ -14,3 +14,9 @@ There are several options to run:
 * Run on suitable [Binder](https://binderhub.readthedocs.io) instance where reasonable resources are available (this is not the case with publicly available [mybinder.org](http://mybinder.org)). Just provide link to this repo, the container is build and started by the service.
 
 In either case, go to *index.ipynb* and enjoy!
+
+## How to cite
+
+A. Křenek, J. Hozzová, J. Olha, D. Trapl, V. Spiwok, 
+Exploring Protein Folding Space with Neural Network Guided Simulations,
+submitted to ESM 2020.
