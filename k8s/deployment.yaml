@@ -36,16 +36,10 @@ spec:
           limits:
             cpu: 6
         volumeMounts:
-          - mountPath: /work/.kube
-            name: kube-config-volume
           - mountPath: /work
             name: chicken-work-volume
         command: ['jupyter', 'notebook', '--ip', '0.0.0.0', '--port', '9000' ]
       volumes:
-        - name: kube-config-volume
-          secret:
-            secretName: kube-config-secret
-            defaultMode: 0600
         - name: chicken-work-volume
           persistentVolumeClaim:
             claimName: test-volume
