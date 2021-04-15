@@ -1,0 +1,90 @@
+#!/bin/bash
+
+
+#XXX
+[ -n "$K8S_NS" ] && ns="-n $K8S_NS"
+
+IMAGE=ljocha/gromacs:2021-1
+
+name=$(LC_CTYPE=C tr -cd '0-9a-z' </dev/urandom | head -c 9)
+yaml=/tmp/gmx-$name.yaml
+
+set -- $(getopt n: "$@")
+
+while [ "$1" != -- ]; do case "$1" in
+	-n) mpi=$2; shift;;
+	esac
+	shift
+done
+shift
+
+CPU=1
+GPU=0
+mpi=1
+
+if [ "$1" = mdrun -o $(basename $0) = mdrun ]; then
+	GPU=1
+	omp=1
+	for a in "$@"; do
+		[ $omp = y ]; omp=$a
+		[ $a = -ntomp ] && omp=y
+	done
+	CPU=$(($omp * $mpi))
+fi
+
+MEM=$((4 * $CPU))Gi
+
+cat - >$yaml <<EOF
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gmx-$name
+spec:
+  ttlSecondsAfterFinished: 20
+  template:
+    spec:
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1002
+        fsGroup: 1003
+      containers:
+      - name: gmx
+        image: $IMAGE
+        resources:
+          requests:
+            cpu: $CPU
+            memory: $MEM
+          limits:
+            nvidia.com/gpu: $GPU
+        volumeMounts:
+          - mountPath: /work
+            name: work-volume
+        command: [ "mpirun" ]
+#        command: [ "nvidia-smi" ]
+        args:
+          - "-np"
+          - "$mpi"
+          - "gmx"
+EOF
+
+for a in "$@"; do
+	echo "          - \"$a\"" >>$yaml
+done
+
+cat - >>$yaml <<EOF
+      restartPolicy: Never
+      volumes:
+        - name: work-volume
+          persistentVolumeClaim:
+            claimName: ${WORK_VOLUME:=test-volume}
+EOF
+
+# cat $yaml
+
+kubectl apply $ns -f $yaml
+# XXX
+while kubectl logs job.batch/gmx-$name $ns 2>&1 >/dev/null | grep 'waiting to start'; do sleep 2; done
+kubectl logs job.batch/gmx-$name --follow $ns
+
+kubectl delete job.batch/gmx-$name $ns
+rm $yaml
