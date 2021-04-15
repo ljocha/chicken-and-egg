@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1                                                
+kind: Ingress                                                                   
+metadata:                                                                       
+  name: hello-kubernetes-ingress                                                
+  annotations:                                                                  
+    kuberentes.io/ingress.class: "nginx"                                        
+    kubernetes.io/tls-acme: "true"                                              
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    external-dns.alpha.kubernetes.io/target: k8s-public-u.cerit-sc.cz
+spec:                                                                           
+  tls:                                                                          
+    - hosts:                                                                    
+        - "chicken-and-egg.dyn.cerit-sc.cz"                                              
+      secretName: chicken-and-egg-dyn-cerit-sc-cz-tls                                    
+  rules:                                                                        
+  - host: "chicken-and-egg.dyn.cerit-sc.cz"                                          
+    http:                                                                       
+      paths:                                                                    
+      - backend:                                                                
+          service:                                                              
+            name: chicken-and-egg-svc                                          
+            port:                                                               
+              number: 80                                                      
+        pathType: ImplementationSpecific
