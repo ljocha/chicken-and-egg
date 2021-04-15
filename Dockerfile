@@ -48,4 +48,7 @@ RUN apt clean
 
 WORKDIR /work
 ENV HOME /work
-ENV PATH ${ipy}/bin:${PATH}
+
+RUN mkdir /opt/chicken-and-egg/
+COPY chicken-and-egg.ipynb ions.mdp md.mdp.template minim-sol.mdp minim.mdp.template minim.sh ncores.sh npt.mdp nvt.mdp xvg.py /opt/chicken-and-egg
+ENV PATH ${ipy}/bin:/opt/chicken-and-egg:${PATH}
