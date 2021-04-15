@@ -43,9 +43,14 @@ RUN curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | apt-key add -
 RUN curl -s -L -o /etc/apt/sources.list.d/nvidia-docker.list https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list 
 
 RUN apt update && apt install -y docker-ce-cli nvidia-container-toolkit
+RUN curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+RUN bash -c "echo 'deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main' | tee /etc/apt/sources.list.d/kubernetes.list"
+RUN apt update && apt install -y kubectl
 RUN apt clean
 
 
 WORKDIR /work
 ENV HOME /work
 ENV PATH ${ipy}/bin:${PATH}
+RUN mkdir -p /work
+RUN chown 1001:1001 /work
