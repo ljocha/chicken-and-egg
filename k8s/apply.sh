@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -- $(getopt xn:l:s:t: "$@")
+set -- $(getopt xXn:l:s:t: "$@")
 
 label=
 size=20
@@ -8,12 +8,14 @@ size=20
 token=$(LC_CTYPE=C tr -cd '0-9a-zA-Z' </dev/urandom | head -c 30)
 
 delete=0
+delete_volume=0
 while [ $1 != -- ]; do case $1 in
 	-n) ns="-n $2"; shift ;;
 	-l) label=-$2; shift ;;
 	-s) size=$2; shift ;;
 	-t) token=$2; shift ;;
-	-x) delete=1
+	-X) delete=1; delete_volume=1 ;;
+	-x) delete=1 ;;
 	esac
 	shift
 done
@@ -21,11 +23,12 @@ done
 if [ $delete = 1 ]; then
 	kubectl delete deployment.apps/chicken-and-egg$label $ns
 	kubectl delete service/chicken-and-egg-svc$label $ns
-	kubectl delete pvc/chicken-work$label $ns
 	kubectl delete ingress.networking.k8s.io/chicken-and-egg-ingress$label $ns
+	if [ $delete_volume = 1 ]; then
+		kubectl delete pvc/chicken-work$label $ns
+	fi
 	exit 0
 fi
-
 
 
 # XXX: system-default, can be more specific?
@@ -122,7 +125,10 @@ spec:
         volumeMounts:
           - mountPath: /work
             name: chicken-work-volume
-        command: ['jupyter', 'notebook', '--ip', '0.0.0.0', '--port', '9000', '--NotebookApp.token=$token' ]
+        command: ['/opt/chicken-and-egg/start-notebook.sh', 'jupyter', 'notebook', '--ip', '0.0.0.0', '--port', '9000', '--NotebookApp.token=$token' ]
+        env:
+        - name: WORK_VOLUME
+          value: chicken-work$label
       volumes:
         - name: chicken-work-volume
           persistentVolumeClaim:
@@ -171,4 +177,5 @@ spec:
     app: chicken-and-egg$label
 EOF
 
+echo 
 echo https://chicken-and-egg$label.dyn.cerit-sc.cz/?token=$token
