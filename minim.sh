@@ -3,7 +3,7 @@
 np=$1
 box=${2:-1.0}
 
-gmx="/work/gmx-docker --"
+[ -z "$gmx" ] && gmx="/work/gmx-docker --"
 
 if [ -z "$np" ]; then
 	echo usage: $0 number_of_cores
