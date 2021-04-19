@@ -42,7 +42,8 @@ spec:
   resources:                                                                    
     requests:                                                                   
       storage: ${size}Gi                                                              
-  storageClassName: csi-nfs
+#  storageClassName: csi-nfs
+  storageClassName: nfs-client
 EOF
 
 
@@ -65,7 +66,7 @@ spec:
       securityContext:
         runAsUser: 1001
         runAsGroup: 1002
-        fsGroup: 1003
+        fsGroup: 1002
 #      initContainers:
 #        - name: volume-permissions
 #          image: ljocha/chicken-and-egg:latest
