@@ -67,6 +67,7 @@ spec:
         runAsUser: 1001
         runAsGroup: 1002
         fsGroup: 1002
+        fsGroupChangePolicy: "OnRootMismatch"
 #      initContainers:
 #        - name: volume-permissions
 #          image: ljocha/chicken-and-egg:latest
