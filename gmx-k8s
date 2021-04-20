@@ -8,19 +8,40 @@ IMAGE=ljocha/gromacs:2021-1fann
 
 name=$(LC_CTYPE=C tr -cd '0-9a-z' </dev/urandom | head -c 9)
 yaml=/tmp/gmx-$name.yaml
+run=gmx-$name.sh
 
-#set -- $(getopt -o +n: -- "$@")
-
-#while [ "$1" != -- ]; do case "$1" in
+mpi=1
 while getopts n: opt; do case "$o" in
-	-n) mpi=$OPTARG;;
+	n) mpi=$OPTARG;;
 	esac
 done
 shift $(($OPTIND - 1))
 
+args=''
+for a in "$@"; do
+	args="$args '$a'"
+done
+
+cat - >$run <<EOF
+#!/bin/bash
+
+cat - <<EIN | mpirun -np $mpi gmx $args >gmx-$name.out 2>gmx-$name.err
+EOF
+
+cat - >>$run
+
+cat - >>$run <<EOF
+EIN
+
+echo \$? >gmx-$name.ret.\$\$
+mv gmx-$name.ret.\$\$ gmx-$name.ret
+EOF
+
+chmod +x $run
+
+
 CPU=1
 GPU=0
-mpi=1
 
 if [ "$1" = mdrun -o $(basename $0) = mdrun ]; then
 	GPU=1
@@ -61,18 +82,7 @@ spec:
           - mountPath: /work
             name: work-volume
         workingDir: /work/${WORKDIR_RELATIVE}
-        command: [ "mpirun" ]
-        args:
-          - "-np"
-          - "$mpi"
-          - "gmx"
-EOF
-
-for a in "$@"; do
-	echo "          - \"$a\"" >>$yaml
-done
-
-cat - >>$yaml <<EOF
+        command: [ "./gmx-$name.sh" ]
       restartPolicy: Never
       volumes:
         - name: work-volume
@@ -80,12 +90,19 @@ cat - >>$yaml <<EOF
             claimName: ${WORK_VOLUME:=test-volume}
 EOF
 
-# cat $yaml
+#cat $yaml
 
 kubectl apply $ns -f $yaml
-# XXX
-while kubectl logs job.batch/gmx-$name $ns 2>&1 >/dev/null | grep 'waiting to start'; do sleep 2; done
-kubectl logs job.batch/gmx-$name --follow $ns
+
+while [ ! -f gmx-$name.ret ]; do
+	sleep 2
+done
+kubectl logs job.batch/gmx-$name $ns
+
+cat gmx-$name.out 
+cat gmx-$name.err >&2
+ret=$(cat gmx-$name.ret)
 
 kubectl delete job.batch/gmx-$name $ns
-rm $yaml
+rm $yaml gmx-$name.ret gmx-$name.out gmx-$name.err
+exit $ret
