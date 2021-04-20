@@ -1,0 +1,117 @@
+#!/bin/bash
+
+np=$1
+box=${2:-1.0}
+
+if [ -z "$np" ]; then
+	echo usage: $0 number_of_cores [box]
+	exit 1
+fi
+
+[ -n "$K8S_NS" ] && ns="-n $K8S_NS"
+IMAGE=ljocha/gromacs:2021-1fann
+name=$(LC_CTYPE=C tr -cd '[:lower:][:digit:]' </dev/urandom | head -c 9)
+
+[ -z "$TEMP" ] && TEMP=/tmp
+
+minone() {
+	in=$1
+	gmx=gmx
+	base=$(basename $in .pdb)
+	
+cat - <<EOF
+	echo ===== Starting $1
+	unset OMP_NUM_THREADS
+	base=$base
+	
+#	echo Prepare topology
+	$gmx pdb2gmx -f $base.pdb -o $base.gro -p $base -i $base -water spce -ff amber99 -ignh &&
+#	echo Add box
+	$gmx editconf -f $base.gro -o $base-box.gro -d $box -bt cubic &&
+	# not solvating
+	# no ions
+#	echo Minimize
+	$gmx grompp -f minim.mdp -c $base-box.gro -p $base.top -o $base-min.tpr -po $base-min.mdp -maxwarn 1 &&
+	$gmx mdrun -v -deffnm $base-min -ntomp 1 &&
+	(echo 10; echo) | $gmx energy -f $base-min.edr -xvg none -o $base.xvg &&
+	tail -1 $base.xvg >$base.minen && rm $base.xvg
+	echo ===== Done $1
+
+EOF
+}
+
+runbatch() {
+	jobname=$1
+	script=$2
+
+#	kubectl apply -f - $ns <<EOF
+	cat - >/tmp/$$.yaml <<EOF
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: $jobname
+spec:
+  ttlSecondsAfterFinished: 20
+  template:
+    spec:
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1002
+        fsGroup: 1002
+        fsGroupChangePolicy: "OnRootMismatch"
+      containers:
+      - name: gmx
+        image: $IMAGE
+        resources:
+          requests:
+            cpu: 1
+            memory: 4Gi
+        volumeMounts:
+          - mountPath: /work
+            name: work-volume
+        workingDir: /work/${WORKDIR_RELATIVE}
+        command: [ "bash", "$script" ]
+      restartPolicy: Never
+      volumes:
+        - name: work-volume
+          persistentVolumeClaim:
+            claimName: ${WORK_VOLUME:=test-volume}
+EOF
+#	cat /tmp/$$.yaml
+	kubectl apply -f /tmp/$$.yaml
+	rm /tmp/$$.yaml
+}
+
+nfil=$(ls conf*.pdb | wc -l)
+
+echo Spawning $np paralel workers
+for p in $(seq 1 $np); do
+	i=$p
+	>$TEMP/minim-$name-$p.sh
+	while [ $i -le $nfil ]; do
+		minone conf$i.pdb >>$TEMP/minim-$name-$p.sh
+		i=$(($i + $np))
+	done
+	mv $TEMP/minim-$name-$p.sh minim-$p.sh
+	runbatch minim-$name-$p minim-$p.sh
+done
+
+#echo Debug exit
+#exit 0
+
+echo Waiting for workers to finish 
+sleep 10
+for p in $(seq 1 $np); do
+#	kubectl logs job.batch/minim-$name-$p $ns
+	while kubectl logs job.batch/minim-$name-$p $ns 2>&1 >/dev/null | grep 'waiting to start'; do sleep 10; done
+	kubectl logs job.batch/minim-$name-$p --follow $ns >minim-$p.log
+	kubectl delete job.batch/minim-$name-$p $ns
+done
+
+echo Done, last 200 lines of their logs
+echo
+
+for p in $(seq 1 $np); do
+	echo ----- $p -----
+	tail -200 minim-$p.log
+done
