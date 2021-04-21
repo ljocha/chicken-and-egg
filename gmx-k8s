@@ -5,8 +5,9 @@
 [ -n "$K8S_NS" ] && ns="-n $K8S_NS"
 
 IMAGE=ljocha/gromacs:2021-1fann
+intimeout=2
 
-name=$(LC_CTYPE=C tr -cd '0-9a-z' </dev/urandom | head -c 9)
+name=$(LC_CTYPE=C tr -cd '[:digit:][:lower:]' </dev/urandom | head -c 9)
 yaml=/tmp/gmx-$name.yaml
 run=gmx-$name.sh
 
@@ -28,7 +29,10 @@ cat - >$run <<EOF
 cat - <<EIN | mpirun -np $mpi gmx $args >gmx-$name.out 2>gmx-$name.err
 EOF
 
-cat - >>$run
+cat - >>$run &
+pid=$!
+sleep $intimeout
+kill $pid
 
 cat - >>$run <<EOF
 EIN
