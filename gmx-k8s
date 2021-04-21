@@ -5,15 +5,16 @@
 [ -n "$K8S_NS" ] && ns="-n $K8S_NS"
 
 IMAGE=ljocha/gromacs:2021-1fann
-intimeout=2
 
 name=$(LC_CTYPE=C tr -cd '[:digit:][:lower:]' </dev/urandom | head -c 9)
 yaml=/tmp/gmx-$name.yaml
 run=gmx-$name.sh
 
 mpi=1
-while getopts n: opt; do case "$o" in
+input=
+while getopts n:i: opt; do case "$opt" in
 	n) mpi=$OPTARG;;
+	i) input="$OPTARG";;
 	esac
 done
 shift $(($OPTIND - 1))
@@ -26,16 +27,7 @@ done
 cat - >$run <<EOF
 #!/bin/bash
 
-cat - <<EIN | mpirun -np $mpi gmx $args >gmx-$name.out 2>gmx-$name.err
-EOF
-
-cat - >>$run &
-pid=$!
-sleep $intimeout
-kill $pid
-
-cat - >>$run <<EOF
-EIN
+echo "$input" | tr , '\012' | mpirun -np $mpi gmx $args >gmx-$name.out 2>gmx-$name.err
 
 echo \$? >gmx-$name.ret.\$\$
 mv gmx-$name.ret.\$\$ gmx-$name.ret
@@ -86,7 +78,7 @@ spec:
           - mountPath: /work
             name: work-volume
         workingDir: /work/${WORKDIR_RELATIVE}
-        command: [ "./gmx-$name.sh" ]
+        command: [ "./$run" ]
       restartPolicy: Never
       volumes:
         - name: work-volume
@@ -108,5 +100,5 @@ cat gmx-$name.err >&2
 ret=$(cat gmx-$name.ret)
 
 kubectl delete job.batch/gmx-$name $ns
-rm $yaml gmx-$name.ret gmx-$name.out gmx-$name.err
+# rm $yaml gmx-$name.ret gmx-$name.out gmx-$name.err
 exit $ret
