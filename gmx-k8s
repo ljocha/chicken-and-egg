@@ -91,6 +91,7 @@ EOF
 kubectl apply $ns -f $yaml
 
 while [ ! -f gmx-$name.ret ]; do
+	ls . >/dev/null
 	sleep 2
 done
 kubectl logs job.batch/gmx-$name $ns
