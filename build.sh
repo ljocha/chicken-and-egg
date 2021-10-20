@@ -1,7 +1,7 @@
 #!/bin/bash
 
 INTELPYTHON=l_pythoni3_p_2020.0.014.tar.gz
-IMAGE=ljocha/chicken-and-egg
+source ./docker-image.sh
 VERSION=:$(cat VERSION)
 
 if [ ! -f "$INTELPYTHON" ]; then

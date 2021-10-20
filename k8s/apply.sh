@@ -1,17 +1,19 @@
 #!/bin/bash
 
-set -- $(getopt xXn:l:s:t: "$@")
+set -- $(getopt xXn:l:s:t:u: "$@")
 
 label=
 size=20
 
 token=$(LC_CTYPE=C tr -cd '[:alnum:]' </dev/urandom | head -c 30)
 
+IMAGE=ljocha/chicken-and-egg
 delete=0
 delete_volume=0
 while [ $1 != -- ]; do case $1 in
 	-n) ns="-n $2"; shift ;;
 	-l) label=-$2; shift ;;
+  -u) IMAGE=$2/chicken-and-egg; shift ;;
 	-s) size=$2; shift ;;
 	-t) token=$2; shift ;;
 	-X) delete=1; delete_volume=1 ;;
@@ -42,12 +44,12 @@ spec:
   resources:                                                                    
     requests:                                                                   
       storage: ${size}Gi                                                              
-#  storageClassName: csi-nfs
-  storageClassName: nfs-client
+  # storageClassName: csi-nfs
+  # storageClassName: nfs-client
+  storageClassName: nfs-csi
 EOF
 
 
-#cat - <<EOF
 kubectl apply $ns -f - <<EOF
 apiVersion: apps/v1
 kind: Deployment
@@ -70,14 +72,14 @@ spec:
         fsGroupChangePolicy: "OnRootMismatch"
 #      initContainers:
 #        - name: volume-permissions
-#          image: ljocha/chicken-and-egg:latest
+#          image: $IMAGE:latest
 #          command: [ '/bin/bash', '-c', 'chown -R 1001:1001 /work' ]
 #          volumeMounts:
 #          - mountPath: /work
 #            name: chicken-work-volume
       containers:      
       - name: chicken-and-egg
-        image: ljocha/chicken-and-egg:latest
+        image: $IMAGE:latest
         securityContext:
           allowPrivilegeEscalation: false
         ports:
