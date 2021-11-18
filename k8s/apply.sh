@@ -4,6 +4,7 @@ set -- $(getopt xXn:l:s:t:u: "$@")
 
 label=
 size=20
+domain=dyn.cloud.e-infra.cz
 
 token=$(LC_CTYPE=C tr -cd '[:alnum:]' </dev/urandom | head -c 30)
 
@@ -21,6 +22,8 @@ while [ $1 != -- ]; do case $1 in
 	esac
 	shift
 done
+
+dashdomain=$(echo $domain | tr . -)
 
 if [ $delete = 1 ]; then
 	kubectl delete deployment.apps/chicken-and-egg$label $ns
@@ -111,15 +114,14 @@ metadata:
     kuberentes.io/ingress.class: "nginx"                                        
     kubernetes.io/tls-acme: "true"                                              
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    external-dns.alpha.kubernetes.io/target: k8s-public-u.cerit-sc.cz
     nginx.ingress.kubernetes.io/proxy-body-size: 300m 
 spec:                                                                           
   tls:                                                                          
     - hosts:                                                                    
-        - "chicken-and-egg$label.dyn.cerit-sc.cz"                                              
-      secretName: chicken-and-egg$label-dyn-cerit-sc-cz-tls                                    
+        - "chicken-and-egg$label.$domain"                                              
+      secretName: chicken-and-egg$label-$dashdomain-tls                                    
   rules:                                                                        
-  - host: "chicken-and-egg$label.dyn.cerit-sc.cz"                                          
+  - host: "chicken-and-egg$label.$domain"                                          
     http:                                                                       
       paths:                                                                    
       - backend:                                                                
@@ -146,4 +148,4 @@ spec:
 EOF
 
 echo 
-echo https://chicken-and-egg$label.dyn.cerit-sc.cz/?token=$token
+echo https://chicken-and-egg$label.$domain/?token=$token
