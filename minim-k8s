@@ -9,7 +9,7 @@ if [ -z "$np" ]; then
 fi
 
 [ -n "$K8S_NS" ] && ns="-n $K8S_NS"
-IMAGE=ljocha/gromacs:2021-1fann
+IMAGE=ljocha/gromacs:2021-2
 name=$(LC_CTYPE=C tr -cd '[:lower:][:digit:]' </dev/urandom | head -c 9)
 
 [ -z "$TEMP" ] && TEMP=/tmp
