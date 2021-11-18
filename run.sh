@@ -2,7 +2,14 @@
 
 image=ljocha/chicken-and-egg:$(cat VERSION)
 
-port=${1:-9000}
+port=9000
+while getopts p: o; do case o in
+	p): port=$OPTARG ;;
+esac; done
+
+shift $(($OPTIND - 1))
+
+extra="$@"
 
 docker=docker
 which nvidia-docker && docker=nvidia-docker
@@ -21,4 +28,4 @@ fi
 KMP_INIT_AT_FORK=FALSE
 export KMP_INIT_AT_FORK
 
-$docker run -ti $gpu -e WORKDIR_OUTSIDE=$PWD -e KMP_INIT_AT_FORK -e OMP_NUM_THREADS -u $(id -u):$gid -p $port:$port -v /var/run/docker.sock:/var/run/docker.sock -v $PWD:/work $image jupyter notebook --ip 0.0.0.0 --port $port
+$docker run -ti $gpu -e WORKDIR_OUTSIDE=$PWD -e KMP_INIT_AT_FORK -e OMP_NUM_THREADS -u $(id -u):$gid -p $port:$port -v /var/run/docker.sock:/var/run/docker.sock -v $PWD:/work $extra $image jupyter notebook --ip 0.0.0.0 --port $port
