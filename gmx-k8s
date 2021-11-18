@@ -43,7 +43,7 @@ if [ "$1" = mdrun -o $(basename $0) = mdrun ]; then
 	GPU=1
 	omp=1
 	for a in "$@"; do
-		[ $omp = y ]; omp=$a
+		[ $omp = y ] && omp=$a
 		[ $a = -ntomp ] && omp=y
 	done
 	CPU=$(($omp * $mpi))
