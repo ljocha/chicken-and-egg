@@ -12,9 +12,12 @@ run=gmx-$name.sh
 
 mpi=1
 input=
-while getopts n:i: opt; do case "$opt" in
+oGPU=1
+while getopts n:i:g:v: opt; do case "$opt" in
 	n) mpi=$OPTARG;;
 	i) input="$OPTARG";;
+	i) oGPU="$OPTARG";;
+	v) WORK_VOLUME="$OPTARG";;
 	esac
 done
 shift $(($OPTIND - 1))
@@ -40,7 +43,7 @@ CPU=1
 GPU=0
 
 if [ "$1" = mdrun -o $(basename $0) = mdrun ]; then
-	GPU=1
+	GPU=$oGPU
 	omp=1
 	for a in "$@"; do
 		[ $omp = y ] && omp=$a
@@ -73,6 +76,8 @@ spec:
             cpu: $CPU
             memory: $MEM
           limits:
+            cpu: $CPU
+            memory: $MEM
             nvidia.com/gpu: $GPU
         volumeMounts:
           - mountPath: /work
