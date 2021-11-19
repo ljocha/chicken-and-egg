@@ -90,8 +90,10 @@ spec:
         resources:
           requests:
             cpu: .2
+            memory: 16Gi
           limits:
             cpu: 6
+            memory: 16Gi
         volumeMounts:
           - mountPath: /work
             name: chicken-work-volume
