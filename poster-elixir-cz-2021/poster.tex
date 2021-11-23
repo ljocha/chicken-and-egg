@@ -48,7 +48,10 @@ The Chicken-and-Egg Problem of Landmark-Driven Molecular Dynamics: Are Random La
 
 \headerbox{Metadynamics with Path Collective Variables}{name=pcv,column=0,row=0,span=3}{
 \bp
-Molecular dynamics of proteins can be guided to explore wider range of configurational space (folding paths in particular) with biased potential built on path collective variables, which are derived from a set of landmark structures which approximate the desired trajectory [1,2]. The technique can reduce the time of the MD simulation dramatically. On the other hand, the choice of landmarks is the core of the “chicken and egg” problem – if we know the landmarks along the trajectory, what would be the reason of recomputing the same trajectory? (Well, things are not so simple, but this is the core.)
+Molecular dynamics of proteins can be guided to explore wider range of configurational space (folding paths in particular) with biased potential built on path collective variables, which are derived from a set of landmark structures which approximate the desired trajectory
+[ \lower.9ex\hbox{\includegraphics[height=2.8ex]{from-a-to-b}}
+\lower.9ex\hbox{\includegraphics[height=2.8ex]{meta-isomap}} ].
+The technique can reduce the time of the MD simulation dramatically. On the other hand, the choice of landmarks is the core of the “chicken and egg” problem – if we know the landmarks along the trajectory, what would be the reason of recomputing the same trajectory? (Well, things are not so simple, but this is the core.)
 }
 
 \headerbox{Randomly Generated Landmarks}{name=vystupy,column=3,span=3}{
