@@ -12,14 +12,14 @@
 %\includegraphics{paticky_tisk_up_01.pdf}
 }
 
-\def\bp{\parindent0pt\parskip=\smallskipamount}
+\def\bp{\parindent0pt\parskip=\smallskipamount\raggedright}
 \definecolor{main}{cmyk}{0.06,0.26,0.91,0}
 \definecolor{other}{cmyk}{0.94,0.74,0.09,0}
 \definecolor{muni}{RGB}{0,26,211}
 \definecolor{vscht}{RGB}{205,84,55}
 
 \def\alert#1{\textbf{\color{vscht}#1}}
-\def\qrcite#1{\lower.9ex\hbox{\includegraphics[height=2.8ex]{#1}}}
+\def\qrcite#1{\lower.9ex\hbox{{\includegraphics[height=2.8ex]{#1}}}}
 
 \begin{poster}{
 	grid=false,
@@ -27,8 +27,8 @@
 	background=user,
 	borderColor=gray,
 	headerFontColor=white,
-	headerColorOne=muni,
-	headerColorTwo=vscht,
+	headerColorOne=vscht,
+	headerColorTwo=muni,
 	textborder=rectangle,
 %	headershape=roundedright,
 %	headerborder=none,
@@ -39,12 +39,15 @@
 	boxshade=none,
 }
 { % Eyecatcher
+\includegraphics[height=25mm]{poster-qr}
 }
 {%
+\huge
 The Chicken-and-Egg Problem of Landmark-Driven Molecular Dynamics: Are Random Landmarks Useful?
 }
 {
-\Large\vrule height2ex width0pt Aleš Křenek, Jana Hozzová, Jaroslav Oľha, Martin Kurečka, Dalibor Trapl, Vojtěch Spiwok
+\large\vrule height2ex width0pt {\color{muni}Aleš Křenek, Jana Hozzová, Jaroslav Oľha, Martin Kurečka,}
+{\color{vscht} Dalibor Trapl, Vojtěch Spiwok}
 }
 { % logo
 %\hfill\includegraphics[height=10mm]{mubeamer-ics-english-color}
@@ -53,14 +56,22 @@ The Chicken-and-Egg Problem of Landmark-Driven Molecular Dynamics: Are Random La
 
 \headerbox{Metadynamics with PCV}{name=pcv,column=0,row=0,span=2}{
 \bp
-Molecular dynamics of proteins can be guided to \alert{explore wider range} of configurational space (folding paths in particular) with \alert{biased potential} built on \alert{path collective variables} (PCV), which are derived from a \alert{set of landmark structures} which approximate the desired trajectory
+Molecular dynamics of proteins can be guided to \alert{explore wider range} of conformational space (folding paths in particular) with \alert{biased potential} built on \alert{path collective variables}.
+
+PCVs are derived from a \alert{set of landmark structures} which approximate the desired trajectory
+%\penalty-10000
 [ \qrcite{from-a-to-b} \qrcite{meta-isomap} ].
 
 The technique can \alert{reduce the time} of the MD simulation dramatically. On the other hand, the choice of landmarks is the core of the \alert{\emph{chicken and egg} problem} – if we know the landmarks along the trajectory, what would be the reason of recomputing the same trajectory?
 % (Well, things are not so simple, but this is the core.)
 }
 
-\headerbox{Randomly Generated Landmarks}{name=vystupy,column=2,span=4}{
+\headerbox{}{name=bigpic,column=0,span=6,below=pcv,boxheaderheight=0pt,textborder=none,headerborder=none}
+{
+\includegraphics[width=\hsize]{bigpic2}
+}
+
+\headerbox{Randomly Generated Landmarks}{name=vystupy,column=2,span=4,above=bigpic}{
 \bp
 We aim at \alert{computing the trajectories de novo}, without their prior knowledge. The essential steps are:
 \begin{enumerate}
@@ -69,15 +80,11 @@ by \alert{random twisting of peptide bonds} in the subject protein
 \item \alert{Minimize by steepest descent} in vacuo, using simple force field (Amber99) to resolve unrealistic properties
 \item Discard structures with \alert{too high energy} or failed minimization
 \item Compute low-dimensional embedding of 3N atomic coordinates to define \alert{collective variables}
-\item Train fast-forward \alert{neural network} to estimate CVs from coordinates [ \qrcite{anncolvar} ]
+\item Train feed-forward \alert{neural network} to estimate CVs from coordinates [ \qrcite{anncolvar} ]
 \item Use the network outputs to \alert{generate bias potential} in metadynamics simulation
 \end{enumerate}
 }
 
-\headerbox{}{name=bigpic,column=0,span=6,below=pcv,boxheaderheight=0pt,textborder=none,headerborder=none}
-{
-\includegraphics[width=\hsize]{bigpic2}
-}
 
 \headerbox{Implementation}{name=impl,column=0,below=bigpic,span=4}{
 \bp
@@ -91,18 +98,21 @@ Core of the MD simulation is \alert{Gromacs}.
 Estimation of the CVs by neural network is done by our \alert{optimized module in Plumed}.
 }
 
-\headerbox{Acknowledgement}{name=ack,column=4,below=bigpic,span=2}{
-\bp
-The work was supported by the Grant Agency of the Czech Republic, project no.\ GA19-16857S.
-
-Computational resources were provided by the project LM2018140 supported by the Ministry of Education, Youth and Sports of the Czech Republic.
-}
-
 \headerbox{}{name=logos,column=0,span=6,boxheaderheight=0pt,below=impl,textborder=none,headerborder=none}{
 \bp
 \includegraphics[height=10mm]{logoUCT_basic}
 \hfill\includegraphics[height=10mm]{mubeamer-ics-english-color}
 }
+
+\headerbox{Acknowledgement}{name=ack,column=4,below=bigpic,span=2,above=logos}{
+\bp
+\footnotesize
+\raggedright
+The work was supported by the Grant Agency of the Czech Republic, project no.\ GA19-16857S.
+
+Computational resources were provided by the project LM2018140 supported by the Ministry of \hbox{Education}, Youth and Sports of the Czech Republic.
+}
+
 
 \end{poster}
 \end{document}
