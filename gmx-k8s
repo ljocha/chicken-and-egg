@@ -2,7 +2,6 @@
 
 
 #XXX
-[ -n "$K8S_NS" ] && ns="-n $K8S_NS"
 
 IMAGE=ljocha/gromacs:2021-2
 
@@ -13,14 +12,18 @@ run=gmx-$name.sh
 mpi=1
 input=
 oGPU=1
-while getopts n:i:g:v: opt; do case "$opt" in
+while getopts n:i:g:v:w:N: opt; do case "$opt" in
 	n) mpi=$OPTARG;;
 	i) input="$OPTARG";;
 	i) oGPU="$OPTARG";;
 	v) WORK_VOLUME="$OPTARG";;
+	w) WORKDIR_RELATIVE="$OPTARG";;
+	N) K8S_NS="$OPTARG";;
 	esac
 done
 shift $(($OPTIND - 1))
+
+[ -n "$K8S_NS" ] && ns="-n $K8S_NS"
 
 args=''
 for a in "$@"; do
