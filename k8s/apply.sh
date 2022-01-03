@@ -27,6 +27,7 @@ dashdomain=$(echo $domain | tr . -)
 
 if [ $delete = 1 ]; then
 	kubectl delete deployment.apps/chicken-and-egg$label $ns
+	kubectl delete deployment.apps/chicken-and-egg${label}-placeholder $ns
 	kubectl delete service/chicken-and-egg-svc$label $ns
 	kubectl delete ingress.networking.k8s.io/chicken-and-egg-ingress$label $ns
 	if [ $delete_volume = 1 ]; then
@@ -99,6 +100,8 @@ spec:
             name: chicken-work-volume
         command: ['/opt/chicken-and-egg/start-notebook.sh', 'jupyter', 'notebook', '--ip', '0.0.0.0', '--port', '9000', '--NotebookApp.token=$token' ]
         env:
+        - name: K8S_LABEL
+          value: $label
         - name: WORK_VOLUME
           value: chicken-work$label
       volumes:
