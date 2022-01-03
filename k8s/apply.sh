@@ -108,6 +108,45 @@ spec:
 EOF
 
 kubectl apply $ns -f - <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chicken-and-egg${label}-placeholder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chicken-and-egg${label}-placeholder
+  template:
+    metadata:
+      labels:
+        app: chicken-and-egg${label}-placeholder
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - chicken-and-egg${label}
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: placeholder
+        image: gcr.io/google-containers/pause:3.2
+        securityContext:
+          runAsUser: 1001
+          runAsGroup: 1002
+        resources:
+          limits:
+            cpu: 1
+            memory: 100Mi
+EOF
+
+kubectl scale $ns deployment.apps/chicken-and-egg${label}-placeholder --replicas=0
+
+kubectl apply $ns -f - <<EOF
 apiVersion: networking.k8s.io/v1                                                
 kind: Ingress                                                                   
 metadata:                                                                       
