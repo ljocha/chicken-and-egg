@@ -4,20 +4,17 @@
 np=1
 box=1.0
 
-while getopts n:i:g:v:w:N: opt; do case "$opt" in
+while getopts n:b:v:w:N: opt; do case "$opt" in
         n) np=$OPTARG;;
         b) box="$OPTARG";;
         v) WORK_VOLUME="$OPTARG";;
         w) WORKDIR_RELATIVE="$OPTARG";;
         N) K8S_NS="$OPTARG";;
+	?) echo usage: $0 -n number_of_cores -b box -v volume -w workdir -N namespace >&2; exit 1;;
         esac
 done
-shift $(($OPTIND - 1))
 
-if [ -z "$np" ]; then
-	echo usage: $0 number_of_cores [box]
-	exit 1
-fi
+shift $(($OPTIND - 1))
 
 [ -n "$K8S_NS" ] && ns="-n $K8S_NS"
 IMAGE=ljocha/gromacs:2021-2
