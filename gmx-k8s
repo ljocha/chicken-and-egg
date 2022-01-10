@@ -13,7 +13,9 @@ mpi=1
 input=
 oGPU=1
 gpumem=8
-while getopts n:i:g:m:v:w:N: opt; do case "$opt" in
+prog=gmx
+
+while getopts n:i:g:m:v:w:N:p: opt; do case "$opt" in
 	n) mpi=$OPTARG;;
 	i) input="$OPTARG";;
 	g) oGPU="$OPTARG";;
@@ -21,6 +23,8 @@ while getopts n:i:g:m:v:w:N: opt; do case "$opt" in
 	v) WORK_VOLUME="$OPTARG";;
 	w) WORKDIR_RELATIVE="$OPTARG";;
 	N) K8S_NS="$OPTARG";;
+	p) prog="$OPTARG";;
+	?) exit 1;;
 	esac
 done
 shift $(($OPTIND - 1))
@@ -35,7 +39,7 @@ done
 cat - >$run <<EOF
 #!/bin/bash
 
-echo "$input" | tr , '\012' | mpirun -np $mpi gmx $args >gmx-$name.out 2>gmx-$name.err
+echo "$input" | tr , '\012' | mpirun -np $mpi $prog $args >gmx-$name.out 2>gmx-$name.err
 
 echo \$? >gmx-$name.ret.\$\$
 mv gmx-$name.ret.\$\$ gmx-$name.ret
