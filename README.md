@@ -16,4 +16,6 @@ In either case, go to *index.ipynb* and enjoy!
 
 A. Křenek, J. Hozzová, J. Olha, D. Trapl, V. Spiwok, 
 Exploring Protein Folding Space with Neural Network Guided Simulations,
-submitted to ESM 2020.
+Proc. ESM 2020, EUROSIS-ETI Publication, pp. 305-309
+ISBN: 978-9492859-12-9.
+
