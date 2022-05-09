@@ -1,0 +1,75 @@
+/**
+ * White theme for reveal.js. This is the opposite of the 'black' theme.
+ *
+ * By Hakim El Hattab, http://hakim.se
+ */
+
+
+// Default mixins and settings -----------------
+@import "../template/mixins";
+@import "../template/settings";
+// ---------------------------------------------
+
+
+// Include theme-specific fonts
+@import url(../../lib/font/source-sans-pro/source-sans-pro.css);
+
+
+// Override theme settings (see ../template/settings.scss)
+// $backgroundColor: #fff;
+// Background generator
+//@mixin bodyBackground() {
+//        @include radial-gradient( #9dc9e4, #e7ebfc );
+//}
+
+$mainColor: #822;
+$headingColor: #111;
+
+// $mainFontSize: 4vh;
+$mainFont: 'Source Sans Pro';
+$headingFont: 'Source Sans Pro', sans-serif;
+$headingTextShadow: none;
+$headingLetterSpacing: normal;
+$headingTextTransform: none;
+$headingFontWeight: 600;
+$linkColor: #2a76dd;
+$linkColorHover: lighten( $linkColor, 15% );
+$selectionBackgroundColor: lighten( $linkColor, 25% );
+
+//$heading1Size: 5em;
+//$heading2Size: 1.0em;
+//$heading3Size: 1.3em;
+//$heading4Size: 1.0em;
+
+.rise-enabled .text_cell {
+	font-size: 3vh !important;
+}
+
+.rise-enabled .code_cell {
+	font-size: 2vh !important;
+}
+
+section.has-dark-background {
+	&, h1, h2, h3, h4, h5, h6 {
+		color: #fff;
+	}
+}
+
+// Theme template ------------------------------
+@import "../template/theme";
+// ---------------------------------------------
+
+// override the above @import
+
+.reveal h1 {
+	color: #2d2754;
+	font-size: 5.6vh !important;
+}
+.reveal h2 {
+	color: #2d2754;
+	font-size: 4vh !important;
+}
+.reveal h3 {
+	font-size: 3.8vh !important;
+}
+

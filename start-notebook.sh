@@ -9,6 +9,6 @@ for f in *; do
 	mv /work/$f $backup
 done
 
-cp * /work || exit 1
+cp -r * /work || exit 1
 cd /work
 exec "$@"

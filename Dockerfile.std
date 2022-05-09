@@ -43,6 +43,10 @@ RUN apt install -y curl gnupg
 RUN curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
 RUN bash -c "echo 'deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main' | tee /etc/apt/sources.list.d/kubernetes.list"
 RUN apt update && apt install -y kubectl
+
+RUN apt install -y sassc
+RUN pip3 install rise
+
 RUN apt clean
 
 
@@ -56,3 +60,13 @@ COPY chicken-and-egg.ipynb ions.mdp md.mdp.template minim-sol.mdp minim.mdp.temp
 ENV PATH ${ipy}/bin:/opt/chicken-and-egg:${PATH}
 
 # RUN apt update && apt install -y strace
+
+RUN mkdir /opt/chicken-and-egg/einfra2022
+COPY einfra2022/* /opt/chicken-and-egg/einfra2022/
+
+WORKDIR /opt/chicken-and-egg/einfra2022
+RUN sassc -I /usr/local/lib/python3.8/dist-packages/rise/static/reveal.js/css/theme/source ljocha.scss ljocha.css && ./patch-reveal-themes.sh ljocha.css && cp ljocha.css /usr/local/share/jupyter/nbextensions/rise/reveal.js/css/theme
+
+WORKDIR /work
+
+

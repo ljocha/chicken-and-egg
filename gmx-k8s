@@ -12,7 +12,7 @@ run=gmx-$name.sh
 mpi=1
 input=
 oGPU=1
-gpumem=8
+gpumem=2
 prog=gmx
 
 while getopts n:i:g:m:v:w:N:p: opt; do case "$opt" in
@@ -87,7 +87,6 @@ spec:
           limits:
             cpu: $CPU
             memory: $MEM
-            nvidia.com/gpu: $GPU
             cerit.io/gpu-mem: $gpumem
         volumeMounts:
           - mountPath: /work
@@ -99,6 +98,29 @@ spec:
         - name: work-volume
           persistentVolumeClaim:
             claimName: ${WORK_VOLUME:=test-volume}
+      tolerations:
+        - effect: NoExecute
+          key: node.kubernetes.io/not-ready
+          operator: Exists
+        - effect: NoExecute
+          key: node.kubernetes.io/unreachable
+          operator: Exists
+        - effect: NoSchedule
+          key: node.kubernetes.io/disk-pressure
+          operator: Exists
+        - effect: NoSchedule
+          key: node.kubernetes.io/memory-pressure
+          operator: Exists
+        - effect: NoSchedule
+          key: node.kubernetes.io/pid-pressure
+          operator: Exists
+        - effect: NoSchedule
+          key: node.kubernetes.io/unschedulable
+          operator: Exists
+        - effect: NoSchedule
+          key: node.kubernetes.io/network-unavailable
+          operator: Exists
+
 EOF
 
 #cat $yaml
