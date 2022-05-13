@@ -53,10 +53,10 @@ RUN apt clean
 WORKDIR /home/jovyan
 ENV HOME /home/jovyan
 
-COPY . /home/jovyan
+# COPY . /home/jovyan
 RUN useradd -m -u 1000 jovyan
 
-COPY chicken-and-egg.ipynb ions.mdp md.mdp.template minim-sol.mdp minim.mdp.template minim.sh ncores.sh npt.mdp nvt.mdp xvg.py config.py start-notebook.sh gmx-k8s minim-k8s /home/jovyan
+COPY chicken-and-egg.ipynb ions.mdp md.mdp.template minim-sol.mdp minim.mdp.template minim.sh ncores.sh npt.mdp nvt.mdp xvg.py config.py start-notebook.sh gmx-k8s minim-k8s /home/jovyan/
 
 COPY einfra2022/* /home/jovyan/
 
