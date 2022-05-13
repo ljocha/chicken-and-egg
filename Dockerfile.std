@@ -46,27 +46,22 @@ RUN apt update && apt install -y kubectl
 
 RUN apt install -y sassc
 RUN pip3 install rise
+RUN pip3 install jupyterhub
 
 RUN apt clean
 
+WORKDIR /home/jovyan
+ENV HOME /home/jovyan
 
-WORKDIR /work
-ENV HOME /work
-RUN mkdir -p /work
-RUN chown 1001:1001 /work
+COPY . /home/jovyan
+RUN useradd -m -u 1000 jovyan
 
-RUN mkdir /opt/chicken-and-egg/
-COPY chicken-and-egg.ipynb ions.mdp md.mdp.template minim-sol.mdp minim.mdp.template minim.sh ncores.sh npt.mdp nvt.mdp xvg.py config.py start-notebook.sh gmx-k8s minim-k8s /opt/chicken-and-egg/
-ENV PATH ${ipy}/bin:/opt/chicken-and-egg:${PATH}
+COPY chicken-and-egg.ipynb ions.mdp md.mdp.template minim-sol.mdp minim.mdp.template minim.sh ncores.sh npt.mdp nvt.mdp xvg.py config.py start-notebook.sh gmx-k8s minim-k8s /home/jovyan
 
-# RUN apt update && apt install -y strace
+COPY einfra2022/* /home/jovyan/
 
-RUN mkdir /opt/chicken-and-egg/einfra2022
-COPY einfra2022/* /opt/chicken-and-egg/einfra2022/
-
-WORKDIR /opt/chicken-and-egg/einfra2022
 RUN sassc -I /usr/local/lib/python3.8/dist-packages/rise/static/reveal.js/css/theme/source ljocha.scss ljocha.css && ./patch-reveal-themes.sh ljocha.css && cp ljocha.css /usr/local/share/jupyter/nbextensions/rise/reveal.js/css/theme
 
-WORKDIR /work
+RUN chown -R 1000:1000 /home/jovyan
 
-
+ENTRYPOINT []
