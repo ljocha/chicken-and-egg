@@ -74,6 +74,8 @@ spec:
         runAsGroup: 1002
         fsGroup: 1002
         fsGroupChangePolicy: "OnRootMismatch"
+        seccompProfile:
+          type: RuntimeDefault
 #      initContainers:
 #        - name: volume-permissions
 #          image: $IMAGE:latest
@@ -86,6 +88,9 @@ spec:
         image: $IMAGE:latest
         securityContext:
           allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
         ports:
           - containerPort: 9000
         resources:
@@ -141,6 +146,11 @@ spec:
         securityContext:
           runAsUser: 1001
           runAsGroup: 1002
+          capabilities:
+            drop:
+              - ALL
+          seccompProfile:
+            type: RuntimeDefault
         resources:
           limits:
             cpu: 1
